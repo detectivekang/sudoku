@@ -46,9 +46,12 @@ class NumberPad extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: isHintAvailable ? onHintPressed : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isHintAvailable ? Colors.orange : Colors.grey,
+                  backgroundColor: isHintAvailable ? Colors.orange : Colors.grey[300],
                 ),
-                child: const Icon(Icons.lightbulb),
+                child: Icon(
+                  Icons.lightbulb,
+                  color: isHintAvailable ? Colors.white : Colors.grey[500],
+                ),
               ),
             );
           }
@@ -60,13 +63,15 @@ class NumberPad extends StatelessWidget {
             child: ElevatedButton(
               onPressed: isAvailable ? () => onNumberSelected(number) : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isAvailable ? null : Colors.grey[300],
+                backgroundColor: isAvailable ? Colors.blue[600] : Colors.grey[200],
+                elevation: isAvailable ? 4 : 0,
               ),
               child: Text(
                 number.toString(),
                 style: TextStyle(
                   fontSize: 24,
-                  color: isAvailable ? null : Colors.grey[600],
+                  fontWeight: FontWeight.bold,
+                  color: isAvailable ? Colors.white : Colors.grey[400],
                 ),
               ),
             ),

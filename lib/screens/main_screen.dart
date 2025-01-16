@@ -1,9 +1,47 @@
 import 'package:flutter/material.dart';
 import 'game_screen.dart';
 import 'ranking_screen.dart';
+import 'dart:async';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  bool _unlimitedHints = false;
+  int _logoTapCount = 0;
+  Timer? _logoTapTimer;
+
+  void _handleLogoTap() {
+    _logoTapCount++;
+    _logoTapTimer?.cancel();
+    
+    if (_logoTapCount == 2) {
+      setState(() {
+        _unlimitedHints = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('힌트 무제한 모드가 활성화되었습니다! 🎉'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _logoTapCount = 0;
+    } else {
+      _logoTapTimer = Timer(const Duration(milliseconds: 500), () {
+        _logoTapCount = 0;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _logoTapTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,51 +74,67 @@ class MainScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // 로고 컨테이너
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [Colors.blue, Colors.purple],
-                          ).createShader(bounds),
-                          child: const Icon(
-                            Icons.grid_on,
-                            size: 72,
-                            color: Colors.white,
+                  GestureDetector(
+                    onTap: _handleLogoTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            spreadRadius: 2,
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          '스도쿠',
-                          style: TextStyle(
-                            fontSize: 56,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                offset: Offset(2, 2),
-                                blurRadius: 4,
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Colors.blue, Colors.purple],
+                            ).createShader(bounds),
+                            child: const Icon(
+                              Icons.grid_on,
+                              size: 72,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              setState(() {
+                                _unlimitedHints = true;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('힌트 무제한 모드가 활성화되었습니다! 🎉'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              '스도쿠',
+                              style: TextStyle(
+                                fontSize: 56,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black26,
+                                    offset: Offset(2, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 60),
@@ -144,18 +198,18 @@ class MainScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDifficultyButton(context, '쉬움', 35, Colors.green),
+            _buildDifficultyButton(context, '쉬움', 35, Colors.green, _unlimitedHints),
             const SizedBox(height: 12),
-            _buildDifficultyButton(context, '보통', 45, Colors.orange),
+            _buildDifficultyButton(context, '보통', 45, Colors.orange, _unlimitedHints),
             const SizedBox(height: 12),
-            _buildDifficultyButton(context, '어려움', 55, Colors.red),
+            _buildDifficultyButton(context, '어려움', 55, Colors.red, _unlimitedHints),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDifficultyButton(BuildContext context, String label, int difficulty, Color color) {
+  Widget _buildDifficultyButton(BuildContext context, String label, int difficulty, Color color, bool unlimitedHints) {
     return Container(
       width: double.infinity,
       height: 50,
@@ -180,7 +234,10 @@ class MainScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => GameScreen(difficulty: difficulty),
+              builder: (context) => GameScreen(
+                difficulty: difficulty,
+                unlimitedHints: unlimitedHints,
+              ),
             ),
           );
         },

@@ -3,7 +3,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdManager {
   static String get rewardedAdUnitId {
-    return 'ca-app-pub-6355564828045606~8622973930';
+    return 'ca-app-pub-3940256099942544/5224354917';
   }
 
   static RewardedAd? _rewardedAd;

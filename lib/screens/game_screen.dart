@@ -10,10 +10,12 @@ import '../services/nickname_manager.dart';
 
 class GameScreen extends StatefulWidget {
   final int difficulty;
+  final bool unlimitedHints;
 
   const GameScreen({
     super.key,
     required this.difficulty,
+    this.unlimitedHints = false,
   });
 
   @override
@@ -38,6 +40,7 @@ class _GameScreenState extends State<GameScreen> {
     super.initState();
     _initializeGame();
     _startTimer();
+    AdManager.loadRewardedAd();
   }
 
   @override
@@ -116,6 +119,34 @@ class _GameScreenState extends State<GameScreen> {
     final completionTime = _stopwatch.elapsed;
     _stopwatch.stop();
     _timer.cancel();
+    String nickname = 'Unknown';
+
+    // 닉네임 입력 다이얼로그 표시
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('닉네임 입력'),
+        content: TextField(
+          decoration: const InputDecoration(
+            hintText: '닉네임을 입력하세요',
+            border: OutlineInputBorder(),
+          ),
+          maxLength: 10,
+          onChanged: (value) {
+            nickname = value.trim().isEmpty ? 'Unknown' : value.trim();
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
 
     // 광고 표시
     showDialog(
@@ -126,12 +157,22 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
 
-    final adShown = await AdManager.showRewardedAd();
-    final nickname = await NicknameManager.instance.getNickname() ?? 'Unknown';
-    
-    if (!mounted) return;
-    Navigator.pop(context);
+    try {
+      final adShown = await AdManager.showRewardedAd();
+      if (!mounted) return;
+      Navigator.pop(context);
 
+      if (!adShown) {
+        print('광고 로드 실패');
+      }
+    } catch (e) {
+      print('광고 에러: $e');
+      if (!mounted) return;
+      Navigator.pop(context);
+    }
+
+    // 결과 다이얼로그 표시 (광고 성공 여부와 관계없이)
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -301,48 +342,41 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _useHint() {
-    if (!isHintAvailable || selectedRow == -1 || selectedCol == -1) return;
+    if ((!isHintAvailable && !widget.unlimitedHints) || selectedRow == -1 || selectedCol == -1) return;
 
-    // 선택된 셀의 정답 찾기
-    for (int num = 1; num <= 9; num++) {
-      if (_generator.isValidMove(board, selectedRow, selectedCol, num)) {
-        bool isCorrectAnswer = true;
-        
-        // 임시로 숫자를 넣어보고 게임을 완성할 수 있는지 확인
-        board[selectedRow][selectedCol] = num;
-        
-        // 여기서는 간단히 처리하지만, 실제로는 더 복잡한 검증이 필요할 수 있습니다
-        for (int i = 0; i < 9 && isCorrectAnswer; i++) {
+    if (widget.unlimitedHints) {
+      // 힌트 무제한 모드일 때는 모든 빈 칸을 자동으로 채움
+      setState(() {
+        for (int i = 0; i < 9; i++) {
           for (int j = 0; j < 9; j++) {
-            if (board[i][j] != 0) continue;
-            bool hasPossibleNumber = false;
-            for (int n = 1; n <= 9; n++) {
-              if (_generator.isValidMove(board, i, j, n)) {
-                hasPossibleNumber = true;
-                break;
+            if (board[i][j] == 0) {
+              // 각 빈 칸에 대해 유효한 숫자 찾기
+              for (int num = 1; num <= 9; num++) {
+                if (_generator.isValidMove(board, i, j, num)) {
+                  board[i][j] = num;
+                  break;
+                }
               }
-            }
-            if (!hasPossibleNumber) {
-              isCorrectAnswer = false;
-              break;
             }
           }
         }
-        
-        // 원래 상태로 되돌리기
-        board[selectedRow][selectedCol] = 0;
-        
-        if (isCorrectAnswer) {
-          setState(() {
-            board[selectedRow][selectedCol] = num;
-            isHintAvailable = false;
-            
-            if (_isGameComplete()) {
-              _showGameCompleteDialog();
-            }
-          });
-          return;
-        }
+        _showGameCompleteDialog();
+      });
+      return;
+    }
+
+    // 일반 모드에서는 기존 힌트 로직 실행
+    for (int num = 1; num <= 9; num++) {
+      if (_generator.isValidMove(board, selectedRow, selectedCol, num)) {
+        setState(() {
+          board[selectedRow][selectedCol] = num;
+          isHintAvailable = false;
+          
+          if (_isGameComplete()) {
+            _showGameCompleteDialog();
+          }
+        });
+        return;
       }
     }
   }
@@ -442,4 +476,4 @@ class _GameScreenState extends State<GameScreen> {
       ],
     );
   }
-}
+} 
