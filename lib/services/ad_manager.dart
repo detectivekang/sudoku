@@ -3,7 +3,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdManager {
   static String get rewardedAdUnitId {
-    return 'ca-app-pub-3940256099942544/5224354917';
+    return 'ca-app-pub-6355564828045606/7703879593'; // 여기에 실제 보상형 광고 단위 ID를 입력
   }
 
   static RewardedAd? _rewardedAd;
@@ -18,10 +18,12 @@ class AdManager {
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
+          print('광고 로드 성공'); // 디버그 로그 추가
           _rewardedAd = ad;
           _isAdLoading = false;
         },
         onAdFailedToLoad: (error) {
+          print('광고 로드 실패: ${error.message}'); // 에러 메시지 출력
           _isAdLoading = false;
         },
       ),
@@ -35,7 +37,7 @@ class AdManager {
     }
 
     final completer = Completer<bool>();
-    
+
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
@@ -59,4 +61,4 @@ class AdManager {
     _rewardedAd?.dispose();
     _rewardedAd = null;
   }
-} 
+}
