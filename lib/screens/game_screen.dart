@@ -6,7 +6,6 @@ import '../models/ranking_record.dart';
 import '../services/ranking_manager.dart';
 import 'dart:async';
 import '../services/ad_manager.dart';
-import '../services/nickname_manager.dart';
 
 class GameScreen extends StatefulWidget {
   final int difficulty;
@@ -87,12 +86,12 @@ class _GameScreenState extends State<GameScreen> {
     if (selectedRow == -1 || selectedCol == -1) return;
     // 원본 보드에서 이미 채워진 셀은 숫자 입력 불가
     if (originalBoard[selectedRow][selectedCol] != 0) return;
-    
+
     if (_generator.isValidMove(board, selectedRow, selectedCol, number)) {
       setState(() {
         board[selectedRow][selectedCol] = number;
       });
-      
+
       if (_isGameComplete()) {
         _showGameCompleteDialog();
       }
@@ -129,7 +128,7 @@ class _GameScreenState extends State<GameScreen> {
         title: const Text('닉네임 입력'),
         content: TextField(
           decoration: const InputDecoration(
-            hintText: '닉네임을 입력하세요',
+            hintText: '닉네임을 입력하세요.',
             border: OutlineInputBorder(),
           ),
           maxLength: 10,
@@ -188,12 +187,14 @@ class _GameScreenState extends State<GameScreen> {
             }
 
             final records = snapshot.data!
-                .where((r) => r.difficulty == _getDifficultyString(widget.difficulty))
+                .where((r) =>
+                    r.difficulty == _getDifficultyString(widget.difficulty))
                 .toList()
               ..sort((a, b) => a.time.compareTo(b.time));
 
-            int rank = records.isEmpty ? 1 : 
-                records.indexWhere((r) => completionTime <= r.time) + 1;
+            int rank = records.isEmpty
+                ? 1
+                : records.indexWhere((r) => completionTime <= r.time) + 1;
             if (rank == 0) rank = records.length + 1;
 
             return Container(
@@ -254,7 +255,9 @@ class _GameScreenState extends State<GameScreen> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: rank <= 3 ? Colors.orange[700] : Colors.grey[600],
+                            color: rank <= 3
+                                ? Colors.orange[700]
+                                : Colors.grey[600],
                           ),
                         ),
                       ],
@@ -280,7 +283,7 @@ class _GameScreenState extends State<GameScreen> {
                             nickname: nickname,
                           );
                           await RankingManager.instance.addRecord(record);
-                          
+
                           if (!mounted) return;
                           Navigator.of(context).pop();
                           Navigator.of(context).pop();
@@ -342,7 +345,9 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _useHint() {
-    if ((!isHintAvailable && !widget.unlimitedHints) || selectedRow == -1 || selectedCol == -1) return;
+    if ((!isHintAvailable && !widget.unlimitedHints) ||
+        selectedRow == -1 ||
+        selectedCol == -1) return;
 
     if (widget.unlimitedHints) {
       // 힌트 무제한 모드일 때는 모든 빈 칸을 자동으로 채움
@@ -371,7 +376,7 @@ class _GameScreenState extends State<GameScreen> {
         setState(() {
           board[selectedRow][selectedCol] = num;
           isHintAvailable = false;
-          
+
           if (_isGameComplete()) {
             _showGameCompleteDialog();
           }
@@ -476,4 +481,4 @@ class _GameScreenState extends State<GameScreen> {
       ],
     );
   }
-} 
+}
