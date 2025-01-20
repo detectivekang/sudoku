@@ -139,7 +139,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   const SizedBox(height: 60),
                   _buildMainButton(
-                    text: '게임 시작1',
+                    text: '게임 시작',
                     onPressed: () => _showDifficultyDialog(context),
                     icon: Icons.play_arrow,
                     gradient: const LinearGradient(
