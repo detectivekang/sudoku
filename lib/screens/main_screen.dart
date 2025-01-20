@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
   void _handleLogoTap() {
     _logoTapCount++;
     _logoTapTimer?.cancel();
-    
+
     if (_logoTapCount == 2) {
       setState(() {
         _unlimitedHints = true;
@@ -139,7 +139,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   const SizedBox(height: 60),
                   _buildMainButton(
-                    text: '게임 시작',
+                    text: '게임 시작1',
                     onPressed: () => _showDifficultyDialog(context),
                     icon: Icons.play_arrow,
                     gradient: const LinearGradient(
@@ -198,18 +198,22 @@ class _MainScreenState extends State<MainScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDifficultyButton(context, '쉬움', 35, Colors.green, _unlimitedHints),
+            _buildDifficultyButton(
+                context, '쉬움', 35, Colors.green, _unlimitedHints),
             const SizedBox(height: 12),
-            _buildDifficultyButton(context, '보통', 45, Colors.orange, _unlimitedHints),
+            _buildDifficultyButton(
+                context, '보통', 45, Colors.orange, _unlimitedHints),
             const SizedBox(height: 12),
-            _buildDifficultyButton(context, '어려움', 55, Colors.red, _unlimitedHints),
+            _buildDifficultyButton(
+                context, '어려움', 55, Colors.red, _unlimitedHints),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDifficultyButton(BuildContext context, String label, int difficulty, Color color, bool unlimitedHints) {
+  Widget _buildDifficultyButton(BuildContext context, String label,
+      int difficulty, Color color, bool unlimitedHints) {
     return Container(
       width: double.infinity,
       height: 50,
@@ -332,7 +336,8 @@ class _MainScreenState extends State<MainScreen> {
                         color: Colors.purple[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.help_outline, color: Colors.purple),
+                      child:
+                          const Icon(Icons.help_outline, color: Colors.purple),
                     ),
                     const SizedBox(width: 16),
                     const Text(
@@ -475,7 +480,7 @@ class SudokuBackgroundPainter extends CustomPainter {
     for (var i = 0; i < 10; i++) {
       final x = (i * 3 * cellSize + cellSize / 2) % width;
       final y = (i * 4 * cellSize + cellSize / 2) % height;
-      
+
       textPainter.text = TextSpan(
         text: '${(i % 9) + 1}',
         style: TextStyle(
@@ -484,7 +489,7 @@ class SudokuBackgroundPainter extends CustomPainter {
           fontWeight: FontWeight.bold,
         ),
       );
-      
+
       textPainter.layout();
       textPainter.paint(
         canvas,
@@ -498,4 +503,4 @@ class SudokuBackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-} 
+}
